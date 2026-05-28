@@ -19,4 +19,14 @@ python -m grpc_tools.protoc \
 # importable as packages.
 touch eureka_grpc/ibc_attestor/__init__.py eureka_grpc/relayer/__init__.py
 
+# protoc emits absolute imports like ``from ibc_attestor import attestation_pb2``
+# (proto ``package`` name → top-level Python module). Rewrite them to
+# relative-package imports so consumers can ``from eureka_grpc.ibc_attestor
+# import …`` without a sys.path hack. Same effect as protoletariat but with
+# no extra dep (and protoletariat caps protobuf at <6 anyway).
+for pkg in ibc_attestor relayer; do
+    sed -i.bak -E "s/^from ${pkg} import /from . import /" eureka_grpc/${pkg}/*.py
+    rm -f eureka_grpc/${pkg}/*.py.bak
+done
+
 echo "regenerated $(find eureka_grpc -name '*_pb2*.py' | wc -l | xargs) stubs"

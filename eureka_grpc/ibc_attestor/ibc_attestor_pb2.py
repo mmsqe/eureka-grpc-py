@@ -22,7 +22,7 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
-from ibc_attestor import attestation_pb2 as ibc__attestor_dot_attestation__pb2
+from . import attestation_pb2 as ibc__attestor_dot_attestation__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1fibc_attestor/ibc_attestor.proto\x12\x0cibc_attestor\x1a\x1eibc_attestor/attestation.proto\")\n\x17StateAttestationRequest\x12\x0e\n\x06height\x18\x01 \x01(\x04\"J\n\x18StateAttestationResponse\x12.\n\x0b\x61ttestation\x18\x01 \x01(\x0b\x32\x19.ibc_attestor.Attestation\"r\n\x18PacketAttestationRequest\x12\x0f\n\x07packets\x18\x01 \x03(\x0c\x12\x0e\n\x06height\x18\x02 \x01(\x04\x12\x35\n\x0f\x63ommitment_type\x18\x03 \x01(\x0e\x32\x1c.ibc_attestor.CommitmentType\"K\n\x19PacketAttestationResponse\x12.\n\x0b\x61ttestation\x18\x01 \x01(\x0b\x32\x19.ibc_attestor.Attestation\"\x15\n\x13LatestHeightRequest\"&\n\x14LatestHeightResponse\x12\x0e\n\x06height\x18\x01 \x01(\x04*b\n\x0e\x43ommitmentType\x12\x1a\n\x16\x43OMMITMENT_TYPE_PACKET\x10\x00\x12\x17\n\x13\x43OMMITMENT_TYPE_ACK\x10\x01\x12\x1b\n\x17\x43OMMITMENT_TYPE_RECEIPT\x10\x02\x32\xb4\x02\n\x12\x41ttestationService\x12\x61\n\x10StateAttestation\x12%.ibc_attestor.StateAttestationRequest\x1a&.ibc_attestor.StateAttestationResponse\x12\x64\n\x11PacketAttestation\x12&.ibc_attestor.PacketAttestationRequest\x1a\'.ibc_attestor.PacketAttestationResponse\x12U\n\x0cLatestHeight\x12!.ibc_attestor.LatestHeightRequest\x1a\".ibc_attestor.LatestHeightResponseB\x10Z\x0etypes/attestorb\x06proto3')

@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from relayer import relayer_pb2 as relayer_dot_relayer__pb2
+from . import relayer_pb2 as relayer_dot_relayer__pb2
 
 GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__

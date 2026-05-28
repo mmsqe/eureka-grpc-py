@@ -1,18 +1,9 @@
-"""Generated gRPC stubs from upstream solidity-ibc-eureka protos.
+"""Generated Python gRPC stubs from upstream solidity-ibc-eureka protos.
 
-Side effect on import: prepends this directory to ``sys.path`` so the
-stubs' intra-package imports (``from ibc_attestor import attestation_pb2``,
-``from relayer import relayer_pb2``) resolve. Without this each consumer
-would need to manipulate sys.path itself.
+Stubs use relative imports (rewritten from protoc's default ``from
+ibc_attestor import …`` to ``from . import …`` by ``scripts/regen-stubs.sh``),
+so consumers import them as a normal sub-package:
 
-See ``protos/eureka/README.md`` for regen instructions.
+    from eureka_grpc.ibc_attestor import ibc_attestor_pb2, ibc_attestor_pb2_grpc
+    from eureka_grpc.relayer import relayer_pb2, relayer_pb2_grpc
 """
-
-from __future__ import annotations
-
-import sys
-from pathlib import Path
-
-_PKG_DIR = str(Path(__file__).parent)
-if _PKG_DIR not in sys.path:
-    sys.path.insert(0, _PKG_DIR)

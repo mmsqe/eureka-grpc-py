@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from ibc_attestor import ibc_attestor_pb2 as ibc__attestor_dot_ibc__attestor__pb2
+from . import ibc_attestor_pb2 as ibc__attestor_dot_ibc__attestor__pb2
 
 GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__
