@@ -123,8 +123,12 @@ class BinaryRelayer:
         try:
             await to_side.w3.eth.call(call, block_identifier=receipt["blockNumber"])
         except Exception as exc:
-            raise RuntimeError(f"{label} reverted (to={to.to_0x_hex()}): {exc}") from exc
-        raise RuntimeError(f"{label} reverted but eth_call passed (to={to.to_0x_hex()})")
+            raise RuntimeError(
+                f"{label} reverted (to={to.to_0x_hex()}): {exc}"
+            ) from exc
+        raise RuntimeError(
+            f"{label} reverted but eth_call passed (to={to.to_0x_hex()})"
+        )
 
     async def relay(
         self, from_side: _Endpoint, to_side: _Endpoint, tx_hash: bytes

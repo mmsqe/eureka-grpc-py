@@ -120,55 +120,6 @@ def _sp1(sp1_programs_dir: str, prover: str = "cpu") -> dict:
     }
 
 
-def build_eth_to_cosmos_sp1_config(
-    *,
-    grpc_port: int,
-    grpc_web_port: int,
-    eth_chain_id: str,
-    eth_rpc_url: str,
-    eth_ics26_address: str,
-    eth_attestor_endpoint: str,
-    cosmos_chain_id: str,
-    cosmos_rpc_url: str,
-    cosmos_signer_address: str,
-    sp1_programs_dir: str,
-    sp1_prover: str = "cpu",
-    quorum_threshold: int = 1,
-    log_level: str = "info",
-) -> dict:
-    """Like :func:`build_eth_to_cosmos_config` but the ``cosmos_to_eth`` leg runs
-    SP1 (real proofs; EVM side is ``SP1ICS07Tendermint``); the reverse leg stays
-    attested (SP1 ICS07 only proves Tendermint→EVM)."""
-    eth_to_cosmos = {
-        "name": "eth_to_cosmos",
-        "src_chain": eth_chain_id,
-        "dst_chain": cosmos_chain_id,
-        "config": {
-            "ics26_address": eth_ics26_address,
-            "tm_rpc_url": cosmos_rpc_url,
-            "eth_rpc_url": eth_rpc_url,
-            "eth_beacon_api_url": "",
-            "signer_address": cosmos_signer_address,
-            "mode": _attested(eth_attestor_endpoint, quorum_threshold),
-        },
-    }
-    cosmos_to_eth = {
-        "name": "cosmos_to_eth",
-        "src_chain": cosmos_chain_id,
-        "dst_chain": eth_chain_id,
-        "config": {
-            "tm_rpc_url": cosmos_rpc_url,
-            "ics26_address": eth_ics26_address,
-            "eth_rpc_url": eth_rpc_url,
-            "mode": _sp1(sp1_programs_dir, sp1_prover),
-        },
-    }
-    return {
-        **_server_observability(grpc_port, grpc_web_port, log_level),
-        "modules": [eth_to_cosmos, cosmos_to_eth],
-    }
-
-
 def build_eth_to_cosmos_config(
     *,
     grpc_port: int,
@@ -181,12 +132,11 @@ def build_eth_to_cosmos_config(
     cosmos_rpc_url: str,
     cosmos_signer_address: str,
     cosmos_attestor_endpoint: str,
-    cosmos_ics26_address: str = "",
     quorum_threshold: int = 1,
     log_level: str = "info",
 ) -> dict:
-    """Bidirectional EVM↔Cosmos config in ``attested`` mode (eth_to_cosmos recv leg
-    + cosmos_to_eth ack leg). ``*_chain_id`` are what ``BinaryRelayer`` passes to
+    """Bidirectional EVM↔Cosmos config, both legs ``attested`` (eth_to_cosmos recv +
+    cosmos_to_eth ack). ``*_chain_id`` are what ``BinaryRelayer`` passes to
     ``RelayByTx`` (EVM hex, Cosmos chain-id string); ``cosmos_signer_address`` is the
     bech32 submitter for the unsigned ``TxBody`` we sign + broadcast."""
     eth_to_cosmos = {
@@ -211,6 +161,55 @@ def build_eth_to_cosmos_config(
             "ics26_address": eth_ics26_address,
             "eth_rpc_url": eth_rpc_url,
             "mode": _attested(cosmos_attestor_endpoint, quorum_threshold),
+        },
+    }
+    return {
+        **_server_observability(grpc_port, grpc_web_port, log_level),
+        "modules": [eth_to_cosmos, cosmos_to_eth],
+    }
+
+
+def build_eth_to_cosmos_sp1_config(
+    *,
+    grpc_port: int,
+    grpc_web_port: int,
+    eth_chain_id: str,
+    eth_rpc_url: str,
+    eth_ics26_address: str,
+    eth_attestor_endpoint: str,
+    cosmos_chain_id: str,
+    cosmos_rpc_url: str,
+    cosmos_signer_address: str,
+    sp1_programs_dir: str,
+    sp1_prover: str = "cpu",
+    quorum_threshold: int = 1,
+    log_level: str = "info",
+) -> dict:
+    """Like :func:`build_eth_to_cosmos_config` but the ``cosmos_to_eth`` leg runs SP1
+    (real proofs; EVM side is ``SP1ICS07Tendermint``); the reverse stays attested
+    (SP1 ICS07 only proves Tendermint→EVM)."""
+    eth_to_cosmos = {
+        "name": "eth_to_cosmos",
+        "src_chain": eth_chain_id,
+        "dst_chain": cosmos_chain_id,
+        "config": {
+            "ics26_address": eth_ics26_address,
+            "tm_rpc_url": cosmos_rpc_url,
+            "eth_rpc_url": eth_rpc_url,
+            "eth_beacon_api_url": "",  # unused in attested mode
+            "signer_address": cosmos_signer_address,
+            "mode": _attested(eth_attestor_endpoint, quorum_threshold),
+        },
+    }
+    cosmos_to_eth = {
+        "name": "cosmos_to_eth",
+        "src_chain": cosmos_chain_id,
+        "dst_chain": eth_chain_id,
+        "config": {
+            "tm_rpc_url": cosmos_rpc_url,
+            "ics26_address": eth_ics26_address,
+            "eth_rpc_url": eth_rpc_url,
+            "mode": _sp1(sp1_programs_dir, sp1_prover),
         },
     }
     return {
