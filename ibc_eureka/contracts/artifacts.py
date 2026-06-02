@@ -40,14 +40,14 @@ def find_repo(label: str, env_var: str, rel_candidates, marker) -> Path:
 
 
 def find_eureka_repo() -> Path:
-    """Locate the solidity-ibc-eureka checkout: ``$EUREKA_REPO_PATH`` first, else a
-    CWD-relative search (``.`` / ``..`` / ``../..``). Set ``$EUREKA_REPO_PATH`` if
-    your checkout lives elsewhere."""
+    """Locate the solidity-ibc-eureka checkout: ``$EUREKA_REPO_PATH`` first, else the
+    nearest ``solidity-ibc-eureka`` dir at the CWD or any ancestor. Set
+    ``$EUREKA_REPO_PATH`` if your checkout lives elsewhere."""
     cwd = Path.cwd()
     return find_repo(
         "solidity-ibc-eureka",
         "EUREKA_REPO_PATH",
-        [cwd / "solidity-ibc-eureka", *(p / "solidity-ibc-eureka" for p in cwd.parents)],
+        [d / "solidity-ibc-eureka" for d in (cwd, *cwd.parents)],
         lambda c: c.is_dir() and (c / "foundry.toml").is_file(),
     )
 
@@ -104,6 +104,18 @@ def extract(entry: dict) -> dict:
     return {"abi": entry["abi"], "bin": entry["evm"]["bytecode"]["object"]}
 
 
+def _cached_extract(key: tuple, source_key: str, source: str, name: str, **kw) -> dict:
+    """Compile ``source`` (once per ``key``) and return ``{abi, bin}`` for ``name``."""
+    if key not in _COMPILE_CACHE:
+        out = compile_standard(source_key, source, **kw)
+        if name not in out:
+            raise KeyError(
+                f"contract {name!r} not in {source_key} (found: {', '.join(out)})"
+            )
+        _COMPILE_CACHE[key] = extract(out[name])
+    return _COMPILE_CACHE[key]
+
+
 def compile_eureka_contract(
     relative_path: str,
     contract_name: str | None = None,
@@ -115,18 +127,14 @@ def compile_eureka_contract(
     if not src.is_file():
         raise FileNotFoundError(f"{src} not found in {repo}")
     name = contract_name or src.stem
-    key = ("eureka", relative_path, name)
-    if key not in _COMPILE_CACHE:
-        file_out = compile_standard(
-            relative_path, src.read_text(), base_path=repo, remappings=_REMAPPINGS
-        )
-        if name not in file_out:
-            raise KeyError(
-                f"contract {name!r} not in {relative_path} "
-                f"(found: {', '.join(file_out)})"
-            )
-        _COMPILE_CACHE[key] = extract(file_out[name])
-    return _COMPILE_CACHE[key]
+    return _cached_extract(
+        ("eureka", relative_path, name),
+        relative_path,
+        src.read_text(),
+        name,
+        base_path=repo,
+        remappings=_REMAPPINGS,
+    )
 
 
 # Short-name → repo-relative path. Update here if upstream renames a file.
@@ -170,8 +178,6 @@ def get_contract(name: str) -> dict:
 
 def compile_inline(source: str, contract_name: str) -> dict:
     """Compile inline Solidity source. Returns ``{"abi", "bin"}``. Cached."""
-    key = ("inline", contract_name, source)
-    if key not in _COMPILE_CACHE:
-        file_out = compile_standard(f"{contract_name}.sol", source)
-        _COMPILE_CACHE[key] = extract(file_out[contract_name])
-    return _COMPILE_CACHE[key]
+    return _cached_extract(
+        ("inline", contract_name, source), f"{contract_name}.sol", source, contract_name
+    )
