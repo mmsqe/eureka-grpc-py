@@ -1,12 +1,16 @@
 [project]
 name = "eureka-grpc-py"
 version = "0.1.0"
-description = "Python gRPC client stubs for the ibc-eureka-relayer proof API + attestor service."
+description = "Python gRPC client stubs (+ optional client/harness wrappers) for the ibc-eureka-relayer proof API + attestor service."
 requires-python = ">=3.12"
 dependencies = [
     "grpcio>=1.80.0",
     "protobuf>=6.0.0",
 ]
+# The base install is stubs-only. The optional wrapper modules expect the consumer
+# to supply their deps (none are declared here): eureka_grpc.relayer.binary needs
+# web3 + eth-account/eth-contract/eth-typing/hexbytes; eureka_grpc.harness.attestor
+# needs eth-utils. eureka_grpc.harness.{process,relayer} are pure stdlib.
 
 [build-system]
 requires = ["hatchling"]
